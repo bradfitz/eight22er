@@ -40,6 +40,18 @@ func main() {
 	select {}
 }
 
+func oauthClient() *oauth.Client {
+	return &oauth.Client{
+		Credentials: oauth.Credentials{
+			Token:  slurpFile("config-consumerkey"),
+			Secret: slurpFile("config-consumersecret"),
+		},
+		TemporaryCredentialRequestURI: "https://api.twitter.com/oauth/request_token",
+		ResourceOwnerAuthorizationURI: "https://api.twitter.com/oauth/authorize",
+		TokenRequestURI:               "https://api.twitter.com/oauth/access_token",
+	}
+}
+
 type Account struct {
 	Username           string // on twitter
 	Password           string // for local service
