@@ -25,12 +25,18 @@ import (
 var (
 	popPort  = flag.Int("pop_port", 1100, "POP3 plaintext port")
 	smtpPort = flag.Int("smtp_port", 2500, "SMTP plaintext port")
+	webPort = flag.Int("web_port", 8000, "Web awesomeness port")
 )
 
 func main() {
 	log.Printf("server.")
+	wln, err := net.Listen("tcp", ":"+strconv.Itoa(*webPort))
+	check(err)
 	ln, err := net.Listen("tcp", ":"+strconv.Itoa(*popPort))
 	check(err)
+	
+	go runWebServer(wln)
+	
 	for {
 		c, err := ln.Accept()
 		if err != nil {
