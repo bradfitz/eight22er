@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -44,10 +45,69 @@ func main() {
 	req.Header.Add("Authorization", authHeader)
 
 	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Fatalf("Get: %v", err)
+	check(err)
+	dms, err := parseDMs(res.Body)
+	check(err)
+	for _, dm := range dms {
+		fmt.Printf("From: %s (%s)\t%q\n", dm.Sender().ScreenName(), dm.Sender().Name(), dm.Text())
 	}
-	io.Copy(os.Stderr, res.Body)
+}
+
+type DM map[string]interface{}
+type User map[string]interface{}
+
+func (d DM) Sender() User {
+	if m, ok := d["sender"].(map[string]interface{}); ok {
+		return User(m)
+	}
+	return User(nil)
+}
+
+func (d DM) Text() string {
+	if s, ok := d["text"].(string); ok {
+		return s
+	}
+	return ""
+}
+
+func (u User) ScreenName() string {
+	if s, ok := u["screen_name"].(string); ok {
+		return s
+	}
+	return ""
+}
+
+func (u User) Name() string {
+	if s, ok := u["name"].(string); ok {
+		return s
+	}
+	return ""
+}
+
+func check(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func parseDMs(r io.Reader) ([]DM, error) {
+	var dms interface{}
+	err := json.NewDecoder(r).Decode(&dms)
+	if err != nil {
+		return nil, err
+	}
+	dmList, ok := dms.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("DM response not a list, got a %T", dms)
+	}
+	ret := []DM{}
+	for _, v := range dmList {
+		dmj, ok := v.(map[string]interface{})
+		if ok {
+			ret = append(ret, DM(dmj))
+		}
+	}
+	return ret, nil
 }
 
 func buildAuthHeader(vals url.Values) string {
