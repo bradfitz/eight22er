@@ -6,7 +6,9 @@ import (
 )
 
 func runWebServer(ln net.Listener) {
-	s := &http.Server{Handler:nil}
+	mux := http.NewServeMux()
+	mux.Handle("/submit", http.HandlerFunc(nil))
+	mux.Handle("/", http.FileServer(http.Dir("static")))
+	s := &http.Server{Handler: mux}
 	s.Serve(ln)
 }
-
