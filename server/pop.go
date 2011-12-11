@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/textproto"
 	"strings"
+	"time"
 )
 
 type pop3State int
@@ -58,10 +59,11 @@ func (s *POPServer) newConn(c net.Conn) *Conn {
 
 type Conn struct {
 	net.Conn
-	s  *POPServer
-	br *bufio.Reader
-	bw *bufio.Writer
-	tr *textproto.Reader
+	s    *POPServer
+	br   *bufio.Reader
+	bw   *bufio.Writer
+	tr   *textproto.Reader
+	acct *Account
 }
 
 func (c *Conn) send(s string) {
@@ -88,7 +90,7 @@ func (c *Conn) serve() error {
 	c.send("+OK POP3 eight22er here, ready to proxy your DMs, yo")
 
 	state := authState
-	var user, password string
+	var user string
 	for {
 		line, err := c.tr.ReadLine()
 		if err != nil {
@@ -114,13 +116,19 @@ func (c *Conn) serve() error {
 			if state != authState {
 				return c.disconnect(fmt.Sprintf("Bogus %s command in wrong state", cmd))
 			}
-			password = params
+			password := params
+			acct, err := GetAccount(user, password)
+			if err != nil {
+				time.Sleep(time.Second)
+				c.err("nope")
+				continue
+			}
 			c.send("+OK")
+			c.acct = acct
+			state = txState
 		default:
 			log.Printf("UNHANDLED COMMAND %q, params %q", cmd, params)
 		}
 	}
-	log.Printf("user = %q, password = %q", user, password)
 	return nil
 }
-

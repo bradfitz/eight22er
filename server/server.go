@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -22,7 +23,7 @@ import (
 var (
 	popPort  = flag.Int("pop_port", 1100, "POP3 plaintext port")
 	smtpPort = flag.Int("smtp_port", 2500, "SMTP plaintext port")
-	webPort = flag.Int("web_port", 8000, "Web awesomeness port")
+	webPort  = flag.Int("web_port", 8000, "Web awesomeness port")
 )
 
 func main() {
@@ -31,12 +32,43 @@ func main() {
 	check(err)
 	pln, err := net.Listen("tcp", ":"+strconv.Itoa(*popPort))
 	check(err)
-	
+
 	pop := NewPOPServer(pln)
 
 	go runWebServer(wln)
 	go pop.run()
-	select{}
+	select {}
+}
+
+type Account struct {
+	Username           string // on twitter
+	Password           string // for local service
+	Token, TokenSecret string
+}
+
+var errAuthFailure = errors.New("Auth failure")
+
+func GetAccount(user, pass string) (*Account, error) {
+	f, err := os.Open(fmt.Sprintf("db/%s.cred", user))
+	if err != nil {
+		return nil, errAuthFailure
+	}
+	defer f.Close()
+	bs, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, errAuthFailure
+	}
+	v := strings.Split(string(bs), "\n")
+	if len(v) < 3 || v[0] != pass {
+		return nil, errAuthFailure
+	}
+	a := &Account{
+		Username:    user,
+		Password:    pass,
+		Token:       strings.TrimSpace(v[1]),
+		TokenSecret: strings.TrimSpace(v[2]),
+	}
+	return a, nil
 }
 
 type DM map[string]interface{}
