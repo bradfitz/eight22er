@@ -25,7 +25,7 @@ func loginFunc(w http.ResponseWriter, r *http.Request) {
 	check(err)
 	authURL := oc.AuthorizationURL(cred)
 	println("AUTH URL: " + authURL)
-	fmt.Fprintf(w, "<html><body>Got auth URL: <a href='%s'>%s</a></body></html>", authURL, authURL)
+	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
 func cbFunc(w http.ResponseWriter, r *http.Request) {
