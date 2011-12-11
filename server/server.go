@@ -169,12 +169,7 @@ func buildAuthHeader(vals url.Values) string {
 }
 
 func foo() {
-	oc := &oauth.Client{
-		Credentials: oauth.Credentials{
-			Token:  slurpFile("config-consumerkey"),
-			Secret: slurpFile("config-consumersecret"),
-		},
-	}
+	oc := oauthClient()
 	cred := &oauth.Credentials{
 		Token:  slurpFile("config-token"),
 		Secret: slurpFile("config-tokensecret"),
