@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/textproto"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -156,6 +157,10 @@ func (c *Conn) serve() error {
 			if state != txState {
 				return c.disconnect("wrong state yo")
 			}
+			if params != "" {
+				c.err("TODO: support LIST with an argument")
+				continue
+			}
 			dms, err := c.dms()
 			if err != nil {
 				c.err(err.Error())
@@ -163,11 +168,62 @@ func (c *Conn) serve() error {
 			}
 			var buf bytes.Buffer
 			fmt.Fprintf(&buf, "+OK %d messages\r\n", len(dms))
-			for _, dm := range dms {
-				fmt.Fprintf(&buf, "%d %d\r\n", dm.ID(), dm.Octets())
+			for n, dm := range dms {
+				fmt.Fprintf(&buf, "%d %d\r\n", n + 1, dm.Octets())
 			}
 			fmt.Fprintf(&buf, ".\r\n")
 			c.send(buf.String())
+		case "UIDL":
+			if state != txState {
+				return c.disconnect("wrong state yo")
+			}
+			if params != "" {
+				c.err("TODO: support UIDL with an argument")
+				continue
+			}
+			dms, err := c.dms()
+			if err != nil {
+				c.err(err.Error())
+				continue
+			}
+			var buf bytes.Buffer
+			fmt.Fprintf(&buf, "+OK %d messages\r\n", len(dms))
+			for n, dm := range dms {
+				fmt.Fprintf(&buf, "%d twdmid%d\r\n", n + 1, dm.ID())
+			}
+			fmt.Fprintf(&buf, ".\r\n")
+			c.send(buf.String())
+		case "RETR":
+			if state != txState {
+                                return c.disconnect("wrong state yo")
+                        }
+			n, err := strconv.Atoi(params)
+			if err != nil {
+				c.err("bad number")
+				continue
+			}
+			dms, _ := c.dms()
+			if n > len(dms) {
+				c.err("bad index")
+				continue
+			}
+			dm := dms[n-1]
+			msg := dm.RFC822()
+			c.send(fmt.Sprintf("+OK %d octets\r\n%s\r\n.\r\n", len(msg), msg))
+		case "DELE":
+			if state != txState {
+                                return c.disconnect("wrong state yo")
+                        }
+			n, err := strconv.Atoi(params)
+			if err != nil {
+                                c.err("bad number")
+				        continue
+                        }
+			log.Printf("client wants to delete message %d", n)
+			c.send("+OK")
+		case "QUIT":
+			c.send("+OK")
+			break
 		default:
 			log.Printf("UNHANDLED COMMAND %q, params %q", cmd, params)
 		}
