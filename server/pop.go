@@ -141,7 +141,7 @@ func (c *Conn) serve() error {
 			}
 			password := params
 			acct, err := GetAccount(user, password)
-			if err != nil {
+			if err != nil || acct.Password == "" {
 				time.Sleep(time.Second)
 				c.err("nope")
 				continue

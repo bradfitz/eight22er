@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 
 	"eight22er/oauth"
 )
@@ -61,10 +62,12 @@ func cbFunc(w http.ResponseWriter, r *http.Request) {
 	acct := GetAccountNoAuth(m["screen_name"])
 	acct.Token = cred.Token
 	acct.TokenSecret = cred.Secret
-	acct.Password = cred.Token
+	if acct.Password == "" {
+		acct.Password = cred.Token
+	}
 	acct.Save()
 
-	configURL := fmt.Sprintf("/config.html?user=%v&password=%v", m["screen_name"], cred.Token)
+	configURL := fmt.Sprintf("/config.html?user=%v&password=%v", m["screen_name"], url.QueryEscape(acct.Password))
 	http.Redirect(w, r, configURL, http.StatusFound)
 }
 
@@ -75,9 +78,10 @@ func configFunc(w http.ResponseWriter, r *http.Request) {
 
 	acct, err := GetAccount(username, password)
 	if err != nil {
-		println(w, "Getting account failed: %q", err)
+		log.Printf("Getting account %q failed: %v", username, err)
 		configURL := fmt.Sprintf("/config.html?user=%v&password=%v&wrongpw=1", username, password)
 		http.Redirect(w, r, configURL, http.StatusFound)
+		return
 	}
 
 	acct.Password = newPassword
