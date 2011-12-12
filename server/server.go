@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -60,6 +61,32 @@ type Account struct {
 
 var errAuthFailure = errors.New("Auth failure")
 
+// GetAccountNoAuth always returns an Account object, even if it
+// doesn't exist on disk.  This is for the sign-up flow, assuming the
+// web code will immediately call Save on this after tweaking some
+// fields
+func GetAccountNoAuth(user string) *Account {
+	f, err := os.Open(fmt.Sprintf("db/%s.cred", user))
+	if err != nil {
+		return &Account{Username: user}
+	}
+	defer f.Close()
+	bs, err := ioutil.ReadAll(f)
+	if err != nil {
+		return &Account{Username: user}
+	}
+	v := strings.Split(string(bs), "\n")
+	if len(v) < 3 {
+		return &Account{Username: user}
+	}
+	return &Account{
+		Username:    user,
+		Password:    v[0],
+		Token:       strings.TrimSpace(v[1]),
+		TokenSecret: strings.TrimSpace(v[2]),
+	}
+}
+
 func GetAccount(user, pass string) (*Account, error) {
 	f, err := os.Open(fmt.Sprintf("db/%s.cred", user))
 	if err != nil {
@@ -81,6 +108,17 @@ func GetAccount(user, pass string) (*Account, error) {
 		TokenSecret: strings.TrimSpace(v[2]),
 	}
 	return a, nil
+}
+
+var userRx = regexp.MustCompile(`^[a-zA-Z0-9\.\-]+$`)
+
+func (a *Account) Save() error {
+	if !userRx.MatchString(a.Username) {
+		return errors.New("bogus username")
+	}
+	pw := strings.Replace(a.Password, "\n", "", -1)
+	content := fmt.Sprintf("%s\n%s\n%s\n", pw, a.Token, a.TokenSecret)
+	return ioutil.WriteFile(fmt.Sprintf("db/%s.cred", a.Username), []byte(content), 0700)
 }
 
 type DM map[string]interface{}
