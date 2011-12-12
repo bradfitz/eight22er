@@ -20,12 +20,13 @@ import (
 	"strings"
 
 	"eight22er/oauth"
+	"eight22er/smtp"
 )
 
 var (
 	dev        = flag.Bool("dev", false, "Development mode; use localhost and stuff")
 	popPort    = flag.Int("pop_port", 1100, "POP3 port")
-	smtpPort   = flag.Int("smtp_port", 2500, "SMTP port")
+	smtpPort   = flag.Int("smtp_port", 5870, "SMTP port")
 	webPort    = flag.Int("web_port", 8000, "Web awesomeness port")
 	doSSL      = flag.Bool("ssl", false, "Do SSL")
 	webSSLPort = flag.Int("web_ssl_port", 8001, "Web awesomeness port")
@@ -68,6 +69,21 @@ func main() {
 	}
 	pop := NewPOPServer(pln)
 	go pop.run()
+
+	// SMTP Listener
+	sln, err := net.Listen("tcp", ":"+strconv.Itoa(*smtpPort))
+	check(err)
+	if *doSSL {
+		sln = tls.NewListener(sln, config)
+	}
+	ss := &smtp.Server{
+		Hostname:  "eight22er.danga.com",
+		PlainAuth: true,
+		OnNewMail: func(c smtp.Connection, from smtp.MailAddress) (smtp.Envelope, error) {
+			return nil, errors.New("TODO: we haven't finished sending direct messasges via SMTP yet")
+		},
+	}
+	go ss.Serve(sln)
 
 	select {}
 }

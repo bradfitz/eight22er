@@ -79,8 +79,10 @@ $(document).ready(function(){
     }
     
     $("span.username").text(getParameterByName("user"));
+    $("span.username2").text(getParameterByName("user"));
     $("input[name=username]").val(getParameterByName("user"));
     $("span.password").text(getParameterByName("password"));
+    $("span.password2").text(getParameterByName("password"));
     $("input[name=password]").val(getParameterByName("password"));
     $("input[name=newPassword]").val(getParameterByName("password"));
     
@@ -181,7 +183,7 @@ function getParameterByName(name)
                   Connection Security
                 </td>
                 <td>
-                  SSL/TLS (<b>not</b> STARTTLS)
+                  SSL/TLS (<b>not</b> STARTTLS). <a href="/">Compatibility Notes</a>
                 </td>
               </tr>
             </tbody>
@@ -191,6 +193,52 @@ function getParameterByName(name)
             <p>We got bored and didn't finish this part. Tough. Maybe
             next weekend. We have an extensible SMTP server written
             but didn't wire it up to Twitter API calls.</p>
+
+            <table class="bordered-table zebra-striped span10">
+            <tbody>
+              <tr>
+                <td>
+                  Username
+                </td>
+                <td>
+                  <span class="username2"></span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Password
+                </td>
+                <td>
+                  <span class="password2"></span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Mail Server
+                </td>
+                <td>
+                  eight22er.danga.com
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Mail Port
+                </td>
+                <td>
+                  587
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Connection Security
+                </td>
+                <td>
+                  SSL/TLS (<b>not</b> STARTTLS). <a href="/">Compatibility Notes</a>
+                </td>
+              </tr>
+            </tbody>
+            </table>
+
 
             <h3>Password</h3>
             <p>This is not your Twitter password. This is the password
