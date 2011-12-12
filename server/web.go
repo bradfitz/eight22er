@@ -22,7 +22,11 @@ func runWebServer(ln net.Listener) {
 
 func loginFunc(w http.ResponseWriter, r *http.Request) {
 	oc := oauthClient()
-	cred, err := oc.RequestTemporaryCredentials(http.DefaultClient, "http://localhost:8000/cb")
+	callback := "https://eight22er.danga.com/cb"
+	if *dev {
+		callback = fmt.Sprintf("http://localhost:%d/cb", *webPort)
+	}
+	cred, err := oc.RequestTemporaryCredentials(http.DefaultClient, callback)
 	check(err)
 	authURL := oc.AuthorizationURL(cred)
 	println("AUTH URL: " + authURL)

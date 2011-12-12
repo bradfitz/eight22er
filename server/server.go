@@ -23,6 +23,7 @@ import (
 )
 
 var (
+	dev        = flag.Bool("dev", false, "Development mode; use localhost and stuff")
 	popPort    = flag.Int("pop_port", 1100, "POP3 port")
 	smtpPort   = flag.Int("smtp_port", 2500, "SMTP port")
 	webPort    = flag.Int("web_port", 8000, "Web awesomeness port")
@@ -33,8 +34,8 @@ var (
 func main() {
 	flag.Parse()
 	var (
-		cert tls.Certificate
-		err error
+		cert   tls.Certificate
+		err    error
 		config *tls.Config
 	)
 	if *doSSL {
