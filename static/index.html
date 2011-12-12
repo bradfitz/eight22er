@@ -87,12 +87,29 @@ $(document).ready(function(){
         <div class="row">
           <div class="span14">
             <h2>Direct Messages just got less direct</h2>
-            <p>Authorize with twitter below and we'll give you the POP3 configuration you need. Don't ask why.</p>
-            <p>SMTP maybe next weekend, we ran out of champagne.</p>
+            <p>POP3 access to your Twitter Direct Messages. Authorize with Twitter below and we'll give you POP3 configuration you need. Don't ask why.</p>
+            <p>Replies via SMTP is half done but we ran out of champagne. Maybe next Sunday.</p>
             <div class="well">
                 <a href="/login" class="btn authorize primary">Click this button, you won't regret it</a>
                 <a href="#" title="Sorry" data-content="We regret to inform you that you cannot regret this decision" class="btn regret disabled">I am regretting it already</a>
             </div>
+
+            <h2>FAQ</h2>
+            <h3>Why?</h3>
+            <p>See above.</p>
+
+            <h3>Language?</h3>
+            <p><a href="http://golang.org/">Go</a>, of course. So
+            simple. One process does the web server (both TLS and
+            raw), the Twitter API OAuth stuff, the POP server, the
+            SMTP server, etc.  No threads, no events, just bliss.</p>
+
+            <h3>Source?</h3>
+            <p>Right. We should.</p>
+
+            <h3>Privacy Policy?</h3>
+            <p>Don't use this if you don't trust Brad &amp; Nick's competency or behavior.</p>
+
           </div>
           <!-- <div class="span4">
             <h3>Secondary content</h3>
@@ -101,7 +118,8 @@ $(document).ready(function(){
       </div>
 
       <footer>
-        <p>&copy; a mimosa project</p>
+        <p>&copy; a mimosa project<br/>
+        by <a href="http://twitter.com/bradfitz">@bradfitz</a> and <a href="http://twitter.com/nickoneill">@nickoneill</a></p>
       </footer>
     </div> <!-- /container -->
   </body>
