@@ -169,7 +169,7 @@ func (c *Conn) serve() error {
 			var buf bytes.Buffer
 			fmt.Fprintf(&buf, "+OK %d messages\r\n", len(dms))
 			for n, dm := range dms {
-				fmt.Fprintf(&buf, "%d %d\r\n", n + 1, dm.Octets())
+				fmt.Fprintf(&buf, "%d %d\r\n", n+1, dm.Octets())
 			}
 			fmt.Fprintf(&buf, ".\r\n")
 			c.send(buf.String())
@@ -189,14 +189,14 @@ func (c *Conn) serve() error {
 			var buf bytes.Buffer
 			fmt.Fprintf(&buf, "+OK %d messages\r\n", len(dms))
 			for n, dm := range dms {
-				fmt.Fprintf(&buf, "%d twdmid%d\r\n", n + 1, dm.ID())
+				fmt.Fprintf(&buf, "%d twdmid%d\r\n", n+1, dm.ID())
 			}
 			fmt.Fprintf(&buf, ".\r\n")
 			c.send(buf.String())
 		case "RETR", "TOP":
 			if state != txState {
-                                return c.disconnect("wrong state yo")
-                        }
+				return c.disconnect("wrong state yo")
+			}
 			// We're lazy and treat TOP like RETR, since
 			// there's always like 1 line anyway.  So
 			// ignore TOP's n value.
@@ -220,13 +220,13 @@ func (c *Conn) serve() error {
 			c.send(fmt.Sprintf("+OK %d octets\r\n%s\r\n.\r\n", len(msg), msg))
 		case "DELE":
 			if state != txState {
-                                return c.disconnect("wrong state yo")
-                        }
+				return c.disconnect("wrong state yo")
+			}
 			n, err := strconv.Atoi(params)
 			if err != nil {
-                                c.err("bad number")
-				        continue
-                        }
+				c.err("bad number")
+				continue
+			}
 			log.Printf("client wants to delete message %d", n)
 			c.send("+OK")
 		case "QUIT":
