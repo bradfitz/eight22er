@@ -76,7 +76,21 @@
     <script src="/js/bootstrap-popover.js"></script>
 	<script>
 $(document).ready(function(){
-    $("input.password").val(getParameterByName("password"));
+    if (getParameterByName("setpw")) {
+        
+    }
+    
+    $("span.username").text(getParameterByName("user"));
+    $("input[name=username]").val(getParameterByName("user"));
+    $("input[name=password]").val(getParameterByName("password"));
+    $("input[name=newPassword]").val(getParameterByName("password"));
+    
+    $("input.save").click(function(e){
+        e.preventDefault();
+        
+        $("form").submit();
+        //$.post("/setconfig?username="+getParameterByName("user")+"&password="+$("input.password").val());
+    });
 });
 
 function getParameterByName(name)
@@ -101,17 +115,19 @@ function getParameterByName(name)
         <div class="row">
           <div class="span10">
             <h2>...and done</h2>
-            <p>Everything is all set up. Just plug your new POP3 username () and password into your mail client and you never have to visit this page again. If you feel like it, you can change your password below.</p>
-            <form><fieldset>
+            <p>Everything is all set up. Just plug your new POP3 username (<strong><span class="username"></span></strong>) and password into your mail client and you never have to visit this page again. If you feel like it, you can change your password below.</p>
+            <form action="/setconfig"><fieldset>
+            <input type="hidden" name="username" type="text">
+            <input type="hidden" name="password" type="text">
             <div class="clearfix">
               <label for="xlInput">Your Password</label>
               <div class="input">
-                <input class="xlarge password" id="xlInput" name="xlInput" size="30" type="text">
+                <input class="xlarge" id="xlInput" name="newPassword" size="30" type="text">
               </div>
             </div>
             </fieldset></form>
             <div class="actions">
-                <input type="submit" class="btn primary" value="Save changes">
+                <input type="submit" class="btn save primary" value="Save changes">
             </div>
           </div>
           <div class="span4">
