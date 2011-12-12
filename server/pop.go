@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -59,12 +60,21 @@ func (s *POPServer) newConn(c net.Conn) *Conn {
 
 type Conn struct {
 	net.Conn
-	s    *POPServer
-	br   *bufio.Reader
-	bw   *bufio.Writer
-	tr   *textproto.Reader
-	acct *Account
-	dms  []DM
+	s         *POPServer
+	br        *bufio.Reader
+	bw        *bufio.Writer
+	tr        *textproto.Reader
+	acct      *Account
+	dmsCached []DM
+}
+
+func (c *Conn) dms() ([]DM, error) {
+	if c.dmsCached != nil {
+		return c.dmsCached, nil
+	}
+	var err error
+	c.dmsCached, err = c.acct.GetDMs(50)
+	return c.dmsCached, err
 }
 
 func (c *Conn) send(s string) {
@@ -132,17 +142,32 @@ func (c *Conn) serve() error {
 			if state != txState {
 				return c.disconnect("wrong state yo")
 			}
-			dms, err := c.acct.GetDMs(50)
+			dms, err := c.dms()
 			if err != nil {
 				c.err(err.Error())
 				continue
 			}
-			c.dms = dms
 			octets := 0
 			for _, dm := range dms {
 				octets += dm.Octets()
 			}
 			c.send(fmt.Sprintf("+OK %d %d\r\n", len(dms), octets))
+		case "LIST":
+			if state != txState {
+				return c.disconnect("wrong state yo")
+			}
+			dms, err := c.dms()
+			if err != nil {
+				c.err(err.Error())
+				continue
+			}
+			var buf bytes.Buffer
+			fmt.Fprintf(&buf, "+OK %d messages\r\n", len(dms))
+			for _, dm := range dms {
+				fmt.Fprintf(&buf, "%d %d\r\n", dm.ID(), dm.Octets())
+			}
+			fmt.Fprintf(&buf, ".\r\n")
+			c.send(buf.String())
 		default:
 			log.Printf("UNHANDLED COMMAND %q, params %q", cmd, params)
 		}

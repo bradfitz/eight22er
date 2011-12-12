@@ -138,6 +138,13 @@ func (d DM) Text() string {
 	return ""
 }
 
+func (d DM) ID() int64 {
+	if id, ok := d["id"].(float64); ok {
+		return int64(id)
+	}
+	return 0
+}
+
 func (d DM) Subject() string {
 	t := d.Text()
 	t = strings.Replace(t, "\n", " / ", -1)
