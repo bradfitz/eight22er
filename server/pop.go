@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
@@ -97,8 +98,17 @@ func (c *Conn) disconnect(s string) error {
 }
 
 func (c *Conn) serve() error {
-	log.Printf("New connection from %q", c.RemoteAddr())
 	defer c.Close()
+
+	if tlsConn, ok := c.Conn.(*tls.Conn); ok {
+		log.Printf("New TLS connnection from %q", c.RemoteAddr())
+		if err := tlsConn.Handshake(); err != nil {
+			log.Printf("TLS handshake error from %q: %v", c.RemoteAddr(), err)
+			return err
+		}
+	} else {
+		log.Printf("New raw connnection from %q", c.RemoteAddr())
+	}
 
 	c.send("+OK POP3 eight22er here, ready to proxy your DMs, yo")
 
