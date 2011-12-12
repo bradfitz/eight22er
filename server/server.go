@@ -54,6 +54,11 @@ func main() {
 	log.Printf("server.")
 	wln, err := net.Listen("tcp", ":"+strconv.Itoa(*webPort))
 	check(err)
+	if *dev {
+		go runWebServer(wln)
+	} else {
+		go runSSLRedirector(wln)
+	}
 
 	// POP Listener
 	pln, err := net.Listen("tcp", ":"+strconv.Itoa(*popPort))
@@ -61,10 +66,9 @@ func main() {
 	if *doSSL {
 		pln = tls.NewListener(pln, config)
 	}
-
 	pop := NewPOPServer(pln)
-	go runWebServer(wln)
 	go pop.run()
+
 	select {}
 }
 
