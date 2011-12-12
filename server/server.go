@@ -108,12 +108,16 @@ type Account struct {
 
 var errAuthFailure = errors.New("Auth failure")
 
+func accountFile(user string) string {
+	return fmt.Sprintf("db/%s.cred", strings.ToLower(user))
+}
+
 // GetAccountNoAuth always returns an Account object, even if it
 // doesn't exist on disk.  This is for the sign-up flow, assuming the
 // web code will immediately call Save on this after tweaking some
 // fields
 func GetAccountNoAuth(user string) *Account {
-	f, err := os.Open(fmt.Sprintf("db/%s.cred", user))
+	f, err := os.Open(accountFile(user))
 	if err != nil {
 		return &Account{Username: user}
 	}
@@ -135,7 +139,7 @@ func GetAccountNoAuth(user string) *Account {
 }
 
 func GetAccount(user, pass string) (*Account, error) {
-	f, err := os.Open(fmt.Sprintf("db/%s.cred", user))
+	f, err := os.Open(accountFile(user))
 	if err != nil {
 		return nil, errAuthFailure
 	}
@@ -165,7 +169,7 @@ func (a *Account) Save() error {
 	}
 	pw := strings.Replace(a.Password, "\n", "", -1)
 	content := fmt.Sprintf("%s\n%s\n%s\n", pw, a.Token, a.TokenSecret)
-	return ioutil.WriteFile(fmt.Sprintf("db/%s.cred", a.Username), []byte(content), 0700)
+	return ioutil.WriteFile(accountFile(a.Username), []byte(content), 0700)
 }
 
 type DM map[string]interface{}
