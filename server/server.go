@@ -138,6 +138,13 @@ func (d DM) Text() string {
 	return ""
 }
 
+func (d DM) CreatedAt() string {
+	if s, ok := d["created_at"].(string); ok {
+		return s
+	}
+	return ""
+}
+
 func (d DM) ID() int64 {
 	if id, ok := d["id"].(float64); ok {
 		return int64(id)
@@ -160,6 +167,8 @@ func (d DM) RFC822() string {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "From: %s@eight22er.danga.com (%s)\r\n", d.Sender().ScreenName(), d.Sender().Name())
 	fmt.Fprintf(&buf, "Subject: %s\r\n", d.Subject())
+	fmt.Fprintf(&buf, "Date: %s\r\n", d.CreatedAt())
+	fmt.Fprintf(&buf, "Message-Id: <%d@eight22er.danga.com>\r\n", d.ID())
 	fmt.Fprintf(&buf, "\r\n%s", d.Text())
 	return buf.String()
 }
