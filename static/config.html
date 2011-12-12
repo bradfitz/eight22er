@@ -118,7 +118,7 @@ function getParameterByName(name)
     <div class="container">
       <div class="page-content">
         <div class="page-header">
-          <h1>eight22er <small>making the simple stuff complex</small></h1>
+          <h1><a href="/">eight22er</a> <small>making the simple stuff complex</small></h1>
         </div>
         <div class="row">
           <div class="span14">
@@ -131,6 +131,8 @@ function getParameterByName(name)
                 <p><strong>Oh shit.</strong> Something went wrong setting your password.</p>
               </div>
             <h2>...and done</h2>
+
+            <h3>POP3 Settings (Incoming Mail)</h3>
             <p>Everything is all set up. Just plug your new POP3 username and eight22er password into your mail client and you never have to visit this page again. If you feel like it, you can change your password below.</p>
             <table class="bordered-table zebra-striped span10">
             <tbody>
@@ -166,10 +168,28 @@ function getParameterByName(name)
                   995
                 </td>
               </tr>
+              <tr>
+                <td>
+                  Connection Security
+                </td>
+                <td>
+                  SSL/TLS (<b>not</b> STARTTLS)
+                </td>
+              </tr>
             </tbody>
             </table>
+
+            <h3>SMTP Settings (Outgoing Mail)</h3>
+            <p>We got bored and didn't finish this part. Tough. Maybe
+            next weekend. We have an extensible SMTP server written
+            but didn't wire it up to Twitter API calls.</p>
+
+            <h3>Password</h3>
+            <p>This is not your Twitter password. This is the password
+            just for this mail gimmick. It's sent via SSL. You can change it
+            here to something more memorable than your OAuth token secret:</p>
+
             <form action="/setconfig"><fieldset>
-            <legend>Change your password</legend>
             <input type="hidden" name="username" type="text">
             <input type="hidden" name="password" type="text">
             <div class="clearfix">
@@ -190,7 +210,8 @@ function getParameterByName(name)
       </div>
 
       <footer>
-        <p>&copy; a mimosa project</p>
+        <p>&copy; a mimosa project<br/>
+        by <a href="http://twitter.com/bradfitz">@bradfitz</a> and <a href="http://twitter.com/nickoneill">@nickoneill</a></p>
       </footer>
     </div> <!-- /container -->
   </body>
