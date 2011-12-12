@@ -77,7 +77,10 @@
 	<script>
 $(document).ready(function(){
     if (getParameterByName("setpw")) {
-        
+        $(".setpw").show();
+    }
+    if (getParameterByName("wrongpw")) {
+        $(".wrongpw").show();
     }
     
     $("span.username").text(getParameterByName("user"));
@@ -90,6 +93,12 @@ $(document).ready(function(){
         
         $("form").submit();
         //$.post("/setconfig?username="+getParameterByName("user")+"&password="+$("input.password").val());
+    });
+    
+    $(".alert-message .close").click(function(e){
+        e.preventDefault();
+        
+        $(this).parent().hide();
     });
 });
 
@@ -113,7 +122,15 @@ function getParameterByName(name)
           <h1>eight22er <small>making the simple stuff complex</small></h1>
         </div>
         <div class="row">
-          <div class="span10">
+          <div class="span14">
+              <div class="alert-message setpw success" style="display:none">
+                <a class="close" href="#">×</a>
+                <p><strong>Password set.</strong> Update your mail client.</p>
+              </div>
+              <div class="alert-message wrongpw error" style="display:none">
+                <a class="close" href="#">×</a>
+                <p><strong>Oh shit.</strong> Something went wrong setting your password.</p>
+              </div>
             <h2>...and done</h2>
             <p>Everything is all set up. Just plug your new POP3 username (<strong><span class="username"></span></strong>) and password into your mail client and you never have to visit this page again. If you feel like it, you can change your password below.</p>
             <form action="/setconfig"><fieldset>
@@ -130,9 +147,9 @@ function getParameterByName(name)
                 <input type="submit" class="btn save primary" value="Save changes">
             </div>
           </div>
-          <div class="span4">
+          <!-- <div class="span4">
             <h3>Secondary content</h3>
-          </div>
+          </div> -->
         </div>
       </div>
 
