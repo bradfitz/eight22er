@@ -193,11 +193,19 @@ func (c *Conn) serve() error {
 			}
 			fmt.Fprintf(&buf, ".\r\n")
 			c.send(buf.String())
-		case "RETR":
+		case "RETR", "TOP":
 			if state != txState {
                                 return c.disconnect("wrong state yo")
                         }
-			n, err := strconv.Atoi(params)
+			// We're lazy and treat TOP like RETR, since
+			// there's always like 1 line anyway.  So
+			// ignore TOP's n value.
+			ps := strings.Split(params, " ")
+			if len(ps) < 1 {
+				c.err("bad params")
+				continue
+			}
+			n, err := strconv.Atoi(ps[0])
 			if err != nil {
 				c.err("bad number")
 				continue
