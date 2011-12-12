@@ -12,7 +12,7 @@
     <![endif]-->
 
     <!-- Le styles -->
-	<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
     <style type="text/css">
       /* Override some defaults */
       html, body {
@@ -66,12 +66,7 @@
 
     </style>
 
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap-twipsy.js"></script>
     <script src="/js/bootstrap-popover.js"></script>
 	<script>
@@ -85,6 +80,7 @@ $(document).ready(function(){
     
     $("span.username").text(getParameterByName("user"));
     $("input[name=username]").val(getParameterByName("user"));
+    $("span.password").text(getParameterByName("password"));
     $("input[name=password]").val(getParameterByName("password"));
     $("input[name=newPassword]").val(getParameterByName("password"));
     
@@ -135,8 +131,8 @@ function getParameterByName(name)
                 <p><strong>Oh shit.</strong> Something went wrong setting your password.</p>
               </div>
             <h2>...and done</h2>
-            <p>Everything is all set up. Just plug your new POP3 username (<strong></strong>) and eight22er password into your mail client and you never have to visit this page again. If you feel like it, you can change your password below.</p>
-            <table class="bordered-table zebra-striped span8">
+            <p>Everything is all set up. Just plug your new POP3 username and eight22er password into your mail client and you never have to visit this page again. If you feel like it, you can change your password below.</p>
+            <table class="bordered-table zebra-striped span10">
             <tbody>
               <tr>
                 <td>
@@ -144,6 +140,14 @@ function getParameterByName(name)
                 </td>
                 <td>
                   <span class="username"></span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Password
+                </td>
+                <td>
+                  <span class="password"></span>
                 </td>
               </tr>
               <tr>
@@ -159,7 +163,7 @@ function getParameterByName(name)
                   Mail Port
                 </td>
                 <td>
-                  443
+                  995
                 </td>
               </tr>
             </tbody>
