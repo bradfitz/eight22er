@@ -64,10 +64,12 @@ type Conn struct {
 	bw   *bufio.Writer
 	tr   *textproto.Reader
 	acct *Account
+	dms  []DM
 }
 
 func (c *Conn) send(s string) {
 	c.bw.WriteString(s)
+	log.Printf("Sent: %q", s)
 	if !strings.HasSuffix(s, "\r\n") {
 		c.bw.WriteString("\r\n")
 	}
@@ -126,6 +128,21 @@ func (c *Conn) serve() error {
 			c.send("+OK")
 			c.acct = acct
 			state = txState
+		case "STAT":
+			if state != txState {
+				return c.disconnect("wrong state yo")
+			}
+			dms, err := c.acct.GetDMs(50)
+			if err != nil {
+				c.err(err.Error())
+				continue
+			}
+			c.dms = dms
+			octets := 0
+			for _, dm := range dms {
+				octets += dm.Octets()
+			}
+			c.send(fmt.Sprintf("+OK %d %d\r\n", len(dms), octets))
 		default:
 			log.Printf("UNHANDLED COMMAND %q, params %q", cmd, params)
 		}

@@ -138,6 +138,25 @@ func (d DM) Text() string {
 	return ""
 }
 
+func (d DM) Subject() string {
+	t := d.Text()
+	t = strings.Replace(t, "\n", " / ", -1)
+	t = strings.Replace(t, "\r", "", -1)
+	return t
+}
+
+func (d DM) Octets() int {
+	return len(d.RFC822())
+}
+
+func (d DM) RFC822() string {
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "From: %s@eight22er.danga.com (%s)\r\n", d.Sender().ScreenName(), d.Sender().Name())
+	fmt.Fprintf(&buf, "Subject: %s\r\n", d.Subject())
+	fmt.Fprintf(&buf, "\r\n%s", d.Text())
+	return buf.String()
+}
+
 func (u User) ScreenName() string {
 	if s, ok := u["screen_name"].(string); ok {
 		return s
@@ -206,16 +225,16 @@ func buildAuthHeader(vals url.Values) string {
 	return buf.String()
 }
 
-func foo() {
+func (a *Account) GetDMs(n int) ([]DM, error) {
 	oc := oauthClient()
 	cred := &oauth.Credentials{
-		Token:  slurpFile("config-token"),
-		Secret: slurpFile("config-tokensecret"),
+		Token:  a.Token,
+		Secret: a.TokenSecret,
 	}
 
 	urlBase := "https://api.twitter.com/1/direct_messages.json"
 	params := make(url.Values)
-	params.Set("count", "50")
+	params.Set("count", strconv.Itoa(n))
 	oc.SignParam(cred, "GET", urlBase, map[string][]string(params))
 
 	authHeader := buildAuthHeader(params)
@@ -228,12 +247,14 @@ func foo() {
 	req.Header.Add("Authorization", authHeader)
 
 	res, err := http.DefaultClient.Do(req)
-	check(err)
-	dms, err := parseDMs(res.Body)
-	check(err)
-	for _, dm := range dms {
-		fmt.Printf("From: %s (%s)\t%q\n", dm.Sender().ScreenName(), dm.Sender().Name(), dm.Text())
+	if err != nil {
+		return nil, err
 	}
+	dms, err := parseDMs(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	return dms, nil
 }
 
 func slurpFile(file string) string {
