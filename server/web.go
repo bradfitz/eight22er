@@ -13,6 +13,7 @@ func runWebServer(ln net.Listener) {
 	mux := http.NewServeMux()
 	mux.Handle("/submit", http.HandlerFunc(nil))
 	mux.HandleFunc("/login", loginFunc)
+	mux.HandleFunc("/setconfig", configFunc)
 	mux.HandleFunc("/cb", cbFunc)
 	mux.Handle("/", http.FileServer(http.Dir("static")))
 	s := &http.Server{Handler: mux}
@@ -44,5 +45,17 @@ func cbFunc(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "RequestToken failed: %q", err)
 		return
 	}
-	fmt.Fprintf(w, "Got creds: %#v, map: %#v", cred, m)
+	
+	acct := GetAccountNoAuth(m["screen_name"])
+	acct.Token = cred.Token
+	acct.TokenSecret = cred.Secret
+	acct.Password = cred.Token
+	acct.Save()
+	
+	configURL := fmt.Sprintf("/config.html?user=%v&password=%v",m["screen_name"],cred.Token)
+	http.Redirect(w, r, configURL, http.StatusFound)
+}
+
+func configFunc(w http.ResponseWriter, r *http.Request) {
+	
 }
