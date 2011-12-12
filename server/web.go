@@ -57,5 +57,20 @@ func cbFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func configFunc(w http.ResponseWriter, r *http.Request) {
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	newPassword := r.FormValue("newPassword")
 	
+	acct, err := GetAccount(username, password)
+	if err != nil {
+		println(w, "Getting account failed: %q", err)
+		configURL := fmt.Sprintf("/config.html?user=%v&password=%v&wrongpw=1",username,password)
+		http.Redirect(w, r, configURL, http.StatusFound)
+	}
+	
+	acct.Password = newPassword
+	acct.Save()
+	
+	configURL := fmt.Sprintf("/config.html?user=%v&password=%v&setpw=1",username,newPassword)
+	http.Redirect(w, r, configURL, http.StatusFound)
 }
