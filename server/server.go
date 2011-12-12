@@ -23,8 +23,8 @@ import (
 )
 
 var (
-	popPort    = flag.Int("pop_port", 1100, "POP3 plaintext port")
-	smtpPort   = flag.Int("smtp_port", 2500, "SMTP plaintext port")
+	popPort    = flag.Int("pop_port", 1100, "POP3 port")
+	smtpPort   = flag.Int("smtp_port", 2500, "SMTP port")
 	webPort    = flag.Int("web_port", 8000, "Web awesomeness port")
 	doSSL      = flag.Bool("ssl", false, "Do SSL")
 	webSSLPort = flag.Int("web_ssl_port", 8001, "Web awesomeness port")
@@ -32,12 +32,15 @@ var (
 
 func main() {
 	flag.Parse()
-
+	var (
+		cert tls.Certificate
+		err error
+		config *tls.Config
+	)
 	if *doSSL {
-		cert, err := tls.LoadX509KeyPair("ssl.crt", "ssl.key")
+		cert, err = tls.LoadX509KeyPair("ssl.crt", "ssl.key")
 		check(err)
-		log.Printf("Got cert: %#v", cert)
-		config := &tls.Config{
+		config = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 			ServerName:   "eight22er.danga.com",
 		}
@@ -46,14 +49,19 @@ func main() {
 		tln := tls.NewListener(ln, config)
 		go runWebServer(tln)
 	}
+
 	log.Printf("server.")
 	wln, err := net.Listen("tcp", ":"+strconv.Itoa(*webPort))
 	check(err)
+
+	// POP Listener
 	pln, err := net.Listen("tcp", ":"+strconv.Itoa(*popPort))
 	check(err)
+	if *doSSL {
+		pln = tls.NewListener(pln, config)
+	}
 
 	pop := NewPOPServer(pln)
-
 	go runWebServer(wln)
 	go pop.run()
 	select {}
