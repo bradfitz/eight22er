@@ -25,12 +25,19 @@ import (
 
 var (
 	dev        = flag.Bool("dev", false, "Development mode; use localhost and stuff")
-	popPort    = flag.Int("pop_port", 1100, "POP3 port")
-	smtpPort   = flag.Int("smtp_port", 5870, "SMTP port")
-	webPort    = flag.Int("web_port", 8000, "Web awesomeness port")
+	popPort    = flag.String("pop_port", "1100", "POP3 port")
+	smtpPort   = flag.String("smtp_port", "5870", "SMTP port")
+	webPort    = flag.String("web_port", "8000", "Web awesomeness port")
 	doSSL      = flag.Bool("ssl", false, "Do SSL")
-	webSSLPort = flag.Int("web_ssl_port", 8001, "Web awesomeness port")
+	webSSLPort = flag.String("web_ssl_port", "8001", "Web awesomeness port")
 )
+
+func colonThing(s string) string {
+	if strings.Contains(s, ":") {
+		return s
+	}
+	return ":" + s // assume it's a port number
+}
 
 func main() {
 	flag.Parse()
@@ -46,14 +53,14 @@ func main() {
 			Certificates: []tls.Certificate{cert},
 			ServerName:   "eight22er.danga.com",
 		}
-		ln, err := net.Listen("tcp", ":"+strconv.Itoa(*webSSLPort))
+		ln, err := net.Listen("tcp", colonThing(*webSSLPort))
 		check(err)
 		tln := tls.NewListener(ln, config)
 		go runWebServer(tln)
 	}
 
 	log.Printf("server.")
-	wln, err := net.Listen("tcp", ":"+strconv.Itoa(*webPort))
+	wln, err := net.Listen("tcp", colonThing(*webPort))
 	check(err)
 	if *dev {
 		go runWebServer(wln)
@@ -62,7 +69,7 @@ func main() {
 	}
 
 	// POP Listener
-	pln, err := net.Listen("tcp", ":"+strconv.Itoa(*popPort))
+	pln, err := net.Listen("tcp", colonThing(*popPort))
 	check(err)
 	if *doSSL {
 		pln = tls.NewListener(pln, config)
@@ -71,7 +78,7 @@ func main() {
 	go pop.run()
 
 	// SMTP Listener
-	sln, err := net.Listen("tcp", ":"+strconv.Itoa(*smtpPort))
+	sln, err := net.Listen("tcp", colonThing(*smtpPort))
 	check(err)
 	if *doSSL {
 		sln = tls.NewListener(sln, config)
