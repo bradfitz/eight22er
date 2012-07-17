@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"eight22er/oauth"
+	"github.com/bradfitz/eight22er/oauth"
 )
 
 func runWebServer(ln net.Listener) {

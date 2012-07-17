@@ -1,0 +1,6 @@
+This is a POP3 server for Twitter DMs.
+It's running at https://rfc822er.danga.com/
+
+This was a quick, sloppy joke.
+
+This was also pre-Go 1 code.  I wouldn't use it for anything serious.

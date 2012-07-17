@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"strings"
 
-	"eight22er/oauth"
-	"eight22er/smtp"
+	"github.com/bradfitz/eight22er/oauth"
+	"github.com/bradfitz/go-smtpd/smtpd"
 )
 
 var (
@@ -76,10 +76,10 @@ func main() {
 	if *doSSL {
 		sln = tls.NewListener(sln, config)
 	}
-	ss := &smtp.Server{
+	ss := &smtpd.Server{
 		Hostname:  "eight22er.danga.com",
 		PlainAuth: true,
-		OnNewMail: func(c smtp.Connection, from smtp.MailAddress) (smtp.Envelope, error) {
+		OnNewMail: func(c smtpd.Connection, from smtpd.MailAddress) (smtpd.Envelope, error) {
 			return nil, errors.New("TODO: we haven't finished sending direct messasges via SMTP yet")
 		},
 	}
